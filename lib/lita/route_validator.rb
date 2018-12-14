@@ -32,7 +32,7 @@ module Lita
     def call
       return unless command_satisfied?(route, message)
       return if from_self?(message, robot)
-      return unless matches_pattern?(route, message)
+      return unless matches?(route, message)
       unless authorized?(robot, message.user, route.required_groups)
         robot.trigger(
           :route_authorization_failed,
@@ -59,9 +59,19 @@ module Lita
       message.user.name == robot.name
     end
 
+    def matches?(route, message)
+      return matches_intent?(route, message) if route.intent
+      return matches_pattern?(route, message)
+    end
+
     # Message must match the pattern
     def matches_pattern?(route, message)
       route.pattern === message.body
+    end
+
+    # Message must match the pattern
+    def matches_intent?(route, message)
+      route.pattern === message.intent
     end
 
     # Allow custom route hooks to reject the route

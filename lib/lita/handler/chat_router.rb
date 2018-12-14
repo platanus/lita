@@ -22,6 +22,7 @@ module Lita
         :pattern,
         :callback,
         :command,
+        :intent,
         :required_groups,
         :help,
         :extensions
@@ -34,8 +35,10 @@ module Lita
       # @overload route(pattern, method_name, **options)
       #   Creates a chat route.
       #   @param pattern [Regexp] A regular expression to match incoming messages against.
+      #     The intent name when the intent param is set to true
       #   @param method_name [Symbol, String] The name of the instance method to trigger.
       #   @param command [Boolean] Whether or not the message must be directed at the robot.
+      #   @param intent [Boolean] Whether or not the pattern should be treated as an intent.
       #   @param restrict_to [Array<Symbol, String>, nil] An optional list of authorization
       #     groups the user must be in to trigger the route.
       #   @param help [Hash] An optional map of example invocations to descriptions.
@@ -44,7 +47,9 @@ module Lita
       # @overload route(pattern, **options)
       #   Creates a chat route.
       #   @param pattern [Regexp] A regular expression to match incoming messages against.
+      #     The intent name when the intent param is set to true
       #   @param command [Boolean] Whether or not the message must be directed at the robot.
+      #   @param intent [Boolean] Whether or not the pattern should be treated as an intent.
       #   @param restrict_to [Array<Symbol, String>, nil] An optional list of authorization
       #     groups the user must be in to trigger the route.
       #   @param help [Hash] An optional map of example invocations to descriptions.
@@ -59,6 +64,7 @@ module Lita
           pattern,
           Callback.new(method_name || block),
           options.delete(:command),
+          options.delete(:intent),
           options.delete(:restrict_to),
           options.delete(:help),
           options

@@ -2,6 +2,8 @@
 
 require "forwardable"
 require "shellwords"
+require 'net/http'
+require 'json'
 
 module Lita
   # Represents an incoming chat message.
@@ -11,6 +13,10 @@ module Lita
     # The body of the message.
     # @return [String] The message body.
     attr_reader :body
+
+    # The body of the message.
+    # @return [String] The message body.
+    attr_reader :intent
 
     # The source of the message, which is a user and optional room.
     # @return [Source] The message source.
@@ -44,6 +50,7 @@ module Lita
       @body = body
       @source = source
       @extensions = {}
+      @intent = get_intent
 
       name_pattern = "@?#{Regexp.escape(@robot.mention_name)}[:,]?\\s+"
       alias_pattern = "#{Regexp.escape(@robot.alias)}\\s*" if @robot.alias
@@ -85,6 +92,19 @@ module Lita
     # @return [Boolean] +true+ if the message was a command, +false+ if not.
     def command?
       @command
+    end
+
+    def get_intent
+      uri = URI("http://localhost:5000/parse")
+      params = { q: body }
+      uri.query = URI.encode_www_form(params)
+
+      res = Net::HTTP.get_response(uri)
+      if res.is_a?(Net::HTTPSuccess)
+        nlu_response = JSON.parse(res.body)
+        intent = nlu_response["intent"]["name"]
+        intent&.to_sym
+      end
     end
 
     # An array of matches against the message body for the given {::Regexp}.
